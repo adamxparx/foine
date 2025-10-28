@@ -25,7 +25,7 @@ public class User {
         this.email = email;
         this.password = password;
     }
-
+    
     public void setId(Long id) { this.id = id; }
     public Long getId() { return id; }
 
