@@ -1,5 +1,8 @@
 package com.example.foine.controller;
 
+import java.util.Map;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,22 +23,35 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
+
         boolean success = userService.register(userDTO);
-        if (success) {
-            return ResponseEntity.ok("User registered successfully.");
-        } else {
+
+        if (!success) {
             return ResponseEntity.badRequest().body("Email already exist.");
         }
+        
+        return ResponseEntity.ok("User registered successfully.");
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
+
         boolean success = userService.login(loginDTO);
-        if (success) {
-            return ResponseEntity.ok("Login successful");
-        } else {
-            return ResponseEntity.badRequest().body("Invalid credentials.");
+
+        if (!success) {
+            return ResponseEntity.status(401).body("Invalid credentials.");
         }
+
+        String token = UUID.randomUUID().toString();
+
+        return ResponseEntity.ok(
+            Map.of("token", token)
+        );
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        return ResponseEntity.ok("Successfully logged out.");
     }
     
 }

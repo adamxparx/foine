@@ -23,7 +23,7 @@ public class UserService {
         }
 
         String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
-        User user = new User(userDTO.getEmail(), hashedPassword);
+        User user = new User(userDTO.getEmail(), hashedPassword, userDTO.getUsername());
         userRepository.save(user);
         return true;
     }
