@@ -5,6 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 public class User {
@@ -41,4 +45,16 @@ public class User {
 
     public void setUsername(String username) { this.username = username; }
     public String getUsername() { return username; }
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<ImagePost> imagePosts;
+
+    public List<ImagePost> getImagePosts() {
+        return imagePosts;
+    }
+
+    public void setImagePosts(List<ImagePost> imagePosts) {
+        this.imagePosts = imagePosts;
+    }
 }
