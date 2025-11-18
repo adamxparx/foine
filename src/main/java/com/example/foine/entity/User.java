@@ -54,6 +54,10 @@ public class User {
     @JsonManagedReference
     private List<Comments> comments;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Likes> likes;
+
     public List<ImagePost> getImagePosts() {
         return imagePosts;
     }
