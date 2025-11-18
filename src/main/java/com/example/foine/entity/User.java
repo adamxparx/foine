@@ -58,6 +58,10 @@ public class User {
     @JsonManagedReference
     private List<Likes> likes;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Saves> saves;
+
     public List<ImagePost> getImagePosts() {
         return imagePosts;
     }
