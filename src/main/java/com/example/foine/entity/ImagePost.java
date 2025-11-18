@@ -34,6 +34,14 @@ public class ImagePost {
     @JsonManagedReference
     private List<Comments> comments;
     
+    @OneToMany(mappedBy = "imagePost", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Likes> likes;
+    
+    @OneToMany(mappedBy = "imagePost", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Saves> saves;
+    
     public ImagePost() {}
 
     public ImagePost(String caption) {
