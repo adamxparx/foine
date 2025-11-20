@@ -36,5 +36,7 @@ public class Comments {
     public void setImagePost(ImagePost imagePost) { this.imagePost = imagePost; }
     public ImagePost getImagePost() { return imagePost; }
 
+    public void setUser(User user) { this.user = user; }
+    public User getUser() { return user; }
 
 }

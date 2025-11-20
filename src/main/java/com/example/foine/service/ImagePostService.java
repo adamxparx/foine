@@ -19,11 +19,11 @@ public class ImagePostService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-    public ImagePost createImagePost(String caption, Long userId, MultipartFile file) throws Exception {
+    public ImagePost createImagePost(String title, String description, Long userId, MultipartFile file) throws Exception {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new Exception("User not found"));
         String imageUrl = cloudinaryService.uploadFile(file);
-        ImagePost imagePost = new ImagePost(caption, imageUrl, user);
+        ImagePost imagePost = new ImagePost(title, description, imageUrl, user);
         return imagePostRepository.save(imagePost);
     }
 

@@ -8,20 +8,41 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.foine.entity.Likes;
+import com.example.foine.entity.Saves;
+import com.example.foine.entity.Comments;
+import com.example.foine.repository.LikesRepository;
+import com.example.foine.repository.SavesRepository;
+import com.example.foine.repository.CommentsRepository;
+import com.example.foine.repository.UserRepository;
+
 @RestController
-@RequestMapping("/api/image-posts")
+@RequestMapping("/api/posts")
 public class ImagePostController {
     @Autowired
     private ImagePostService imagePostService;
 
-    @PostMapping
+    @Autowired
+    private LikesRepository likesRepository;
+
+    @Autowired
+    private SavesRepository savesRepository;
+
+    @Autowired
+    private CommentsRepository commentsRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @PostMapping("/upload")
     public ResponseEntity<ImagePost> createImagePost(
-        @RequestParam("caption") String caption,
+        @RequestParam("title") String title,
+        @RequestParam("description") String description,
         @RequestParam("userId") Long userId,
-        @RequestParam("file") MultipartFile file
+        @RequestParam("image") MultipartFile image
     ) {
         try {
-            ImagePost post = imagePostService.createImagePost(caption, userId, file);
+            ImagePost post = imagePostService.createImagePost(title, description, userId, image);
             return ResponseEntity.ok(post);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -40,9 +61,32 @@ public class ImagePostController {
         return ResponseEntity.ok(posts);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ImagePost> getImagePostById(@PathVariable Long id) {
-        ImagePost post = imagePostService.getImagePostById(id);
-        return ResponseEntity.ok(post);
+    @PostMapping("/{postId}/comment")
+    public ResponseEntity<Comments> addComment(@PathVariable Long postId, @RequestParam Long userId, @RequestParam String comment) {
+        ImagePost post = imagePostService.getImagePostById(postId);
+        Comments newComment = new Comments();
+        newComment.setComment(comment);
+        newComment.setImagePost(post);
+        newComment.setUser(userRepository.findById(userId).orElseThrow());
+        commentsRepository.save(newComment);
+        return ResponseEntity.ok(newComment);
+    }
+
+    @GetMapping("/{postId}/likes/count")
+    public ResponseEntity<Long> getLikesCount(@PathVariable Long postId) {
+        long count = likesRepository.countByImagePostId(postId);
+        return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/{postId}/liked")
+    public ResponseEntity<Boolean> isLiked(@PathVariable Long postId, @RequestParam Long userId) {
+        boolean liked = likesRepository.existsByImagePostIdAndUserId(postId, userId);
+        return ResponseEntity.ok(liked);
+    }
+
+    @GetMapping("/{postId}/saved")
+    public ResponseEntity<Boolean> isSaved(@PathVariable Long postId, @RequestParam Long userId) {
+        boolean saved = savesRepository.existsByImagePostIdAndUserId(postId, userId);
+        return ResponseEntity.ok(saved);
     }
 }
