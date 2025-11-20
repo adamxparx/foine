@@ -7,10 +7,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
+@Table(name = "users")
 public class User {
     
     @Id
@@ -23,8 +25,24 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String username;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<ImagePost> posts;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comments> comments;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Likes> likes;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Saves> saves;
 
     public User() {}
 
@@ -46,27 +64,15 @@ public class User {
     public void setUsername(String username) { this.username = username; }
     public String getUsername() { return username; }
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<ImagePost> imagePosts;
+    public List<ImagePost> getPosts() { return posts; }
+    public void setPosts(List<ImagePost> posts) { this.posts = posts; }
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<Comments> comments;
+    public List<Comments> getComments() { return comments; }
+    public void setComments(List<Comments> comments) { this.comments = comments; }
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<Likes> likes;
+    public List<Likes> getLikes() { return likes; }
+    public void setLikes(List<Likes> likes) { this.likes = likes; }
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<Saves> saves;
-
-    public List<ImagePost> getImagePosts() {
-        return imagePosts;
-    }
-
-    public void setImagePosts(List<ImagePost> imagePosts) {
-        this.imagePosts = imagePosts;
-    }
+    public List<Saves> getSaves() { return saves; }
+    public void setSaves(List<Saves> saves) { this.saves = saves; }
 }
