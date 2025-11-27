@@ -12,7 +12,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user_table")
 public class User {
     
     @Id
@@ -29,27 +29,36 @@ public class User {
     private String username;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user")
     private List<ImagePost> posts;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user")
     private List<Comments> comments;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user")
     private List<Likes> likes;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user")
     private List<Saves> saves;
 
-    public User() {}
+    public User() {
+        this.posts = new java.util.ArrayList<>();
+        this.comments = new java.util.ArrayList<>();
+        this.likes = new java.util.ArrayList<>();
+        this.saves = new java.util.ArrayList<>();
+    }
 
     public User(String email, String password, String username) {
         this.email = email;
         this.password = password;
         this.username = username;
+        this.posts = new java.util.ArrayList<>();
+        this.comments = new java.util.ArrayList<>();
+        this.likes = new java.util.ArrayList<>();
+        this.saves = new java.util.ArrayList<>();
     }
     
     public void setId(Long id) { this.id = id; }

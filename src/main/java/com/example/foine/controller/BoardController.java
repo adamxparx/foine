@@ -8,9 +8,10 @@ import com.example.foine.service.BoardService;
 import java.util.List;
 import java.util.Optional;
 
-@RestController
-@RequestMapping("/api/boards")
-public class BoardController {
+/*
+// @RestController
+// @RequestMapping("/api/boards")
+// public class BoardController {
 
     @Autowired
     private BoardService boardService;
@@ -74,4 +75,5 @@ public class BoardController {
             return ResponseEntity.status(403).body("Unauthorized or board not found");
         }
     }
-}
+// }
+*/

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Service
 public class ImagePostService {
     @Autowired
@@ -19,16 +21,34 @@ public class ImagePostService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
+    @Autowired
+    private TagService tagService;
+
     public ImagePost createImagePost(String title, String description, Long userId, MultipartFile file) throws Exception {
+        return createImagePost(title, description, userId, file, null);
+    }
+
+    public ImagePost createImagePost(String title, String description, Long userId, MultipartFile file, List<String> tags) throws Exception {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new Exception("User not found"));
         String imageUrl = cloudinaryService.uploadFile(file);
         ImagePost imagePost = new ImagePost(title, description, imageUrl, user);
-        return imagePostRepository.save(imagePost);
+        imagePost = imagePostRepository.save(imagePost);
+
+        // Add tags if provided
+        if (tags != null && !tags.isEmpty()) {
+            tagService.addTagsToPost(imagePost, tags);
+        }
+
+        return imagePost;
     }
 
-    public java.util.List<ImagePost> getAllImagePosts() {
-        return imagePostRepository.findAll();
+    public org.springframework.data.domain.Page<ImagePost> getAllImagePosts(org.springframework.data.domain.Pageable pageable) {
+        return imagePostRepository.findAll(pageable);
+    }
+
+    public org.springframework.data.domain.Page<ImagePost> searchPosts(String query, org.springframework.data.domain.Pageable pageable) {
+        return imagePostRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(query, query, pageable);
     }
 
     public ImagePost getImagePostById(Long id) {

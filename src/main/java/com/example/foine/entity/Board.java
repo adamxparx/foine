@@ -12,6 +12,8 @@ import jakarta.persistence.CascadeType;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Board {
 
@@ -27,6 +29,7 @@ public class Board {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @JsonIgnore
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
         name = "board_posts",

@@ -32,5 +32,28 @@ build/
 ### VS Code ###
 .vscode/
 
+### Frontend ###
+frontend/node_modules/
+frontend/build/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+### Database ###
+*.mv.db
+*.trace.db
+foine-db.mv.db
+foine-db.trace.db
+
+### Logs ###
+*.log
+log.txt
+
+### OS ###
+.DS_Store
+Thumbs.db
+
 ### Project specific ###
 uploads/
+test_image.jpg

@@ -10,11 +10,11 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Column;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -29,25 +29,36 @@ public class ImagePost {
     @JsonProperty
     private String imageUrl;
     
-    @JsonIgnore
+    @Column(nullable = false)
+    private Long userId;
+    
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "imagePost", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonIgnore
     private List<Comments> comments;
     
     @OneToMany(mappedBy = "imagePost", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonIgnore
     private List<Likes> likes;
     
     @OneToMany(mappedBy = "imagePost", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonIgnore
     private List<Saves> saves;
 
     @ManyToMany(mappedBy = "posts")
+    @JsonIgnore
     private List<Board> boards;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<PostTag> postTags;
 
     public ImagePost() {}
 
@@ -56,6 +67,16 @@ public class ImagePost {
         this.description = description;
         this.imageUrl = imageUrl;
         this.user = user;
+        this.userId = user.getId();
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public ImagePost(String title, String description, String imageUrl, Long userId) {
+        this.title = title;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.userId = userId;
+        this.createdAt = LocalDateTime.now();
     }
 
     // Getters and Setters
@@ -85,5 +106,14 @@ public class ImagePost {
 
     public List<Board> getBoards() { return boards; }
     public void setBoards(List<Board> boards) { this.boards = boards; }
+
+    public List<PostTag> getPostTags() { return postTags; }
+    public void setPostTags(List<PostTag> postTags) { this.postTags = postTags; }
+
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
 

@@ -1,6 +1,7 @@
 package com.example.foine.controller;
 
 import java.util.Map;
+import java.util.HashMap;
 
 import com.example.foine.entity.User;
 
@@ -14,42 +15,38 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.foine.dto.LoginDTO;
 import com.example.foine.dto.UserDTO;
-import com.example.foine.repository.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.example.foine.service.UserService;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api")
 public class UserController {
 
     @Autowired
-    private UserRepository userRepository;
-
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            return ResponseEntity.status(400).body("Email already exist.");
+        boolean success = userService.register(userDTO);
+        if (!success) {
+            return ResponseEntity.status(400).body("Email already exists.");
         }
-        if (userRepository.existsByUsername(userDTO.getUsername())) {
-            return ResponseEntity.status(400).body("Username already exists.");
-        }
-        
-        String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
-        User user = new User(userDTO.getEmail(), hashedPassword, userDTO.getUsername());
-        userRepository.save(user);
-        return ResponseEntity.ok(
-            Map.of("userId", user.getId(), "email", user.getEmail(), "username", user.getUsername())
-        );
+
+        User savedUser = userService.getUserByEmail(userDTO.getEmail());
+        Map<String, Object> response = new HashMap<>();
+        response.put("userId", savedUser.getId());
+        response.put("email", savedUser.getEmail());
+        response.put("username", savedUser.getUsername());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
-        User user = userRepository.findByEmail(loginDTO.getEmail()).orElse(null);
-        if (user == null || !passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+        boolean success = userService.login(loginDTO);
+        if (!success) {
             return ResponseEntity.status(401).body("Invalid credentials.");
         }
+
+        User user = userService.getUserByEmail(loginDTO.getEmail());
         return ResponseEntity.ok(
             Map.of("userId", user.getId(), "email", user.getEmail(), "username", user.getUsername())
         );
@@ -59,5 +56,5 @@ public class UserController {
     public ResponseEntity<?> logout() {
         return ResponseEntity.ok("Successfully logged out.");
     }
-    
+
 }
