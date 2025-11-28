@@ -4,9 +4,12 @@ FROM openjdk:17-jdk-slim
 # Set working directory
 WORKDIR /app
 
-# Copy Maven wrapper and pom.xml
+# Copy Maven wrapper and make it executable
 COPY mvnw .
 COPY .mvn .mvn
+RUN chmod +x mvnw
+
+# Copy pom.xml
 COPY pom.xml .
 
 # Download dependencies (for better caching)
@@ -22,4 +25,4 @@ RUN ./mvnw clean package -DskipTests
 EXPOSE 8080
 
 # Run the application
-CMD ["java", "-jar", "target/*.jar"]
+CMD ["java", "-jar", "target/foine-0.0.1-SNAPSHOT.jar"]
