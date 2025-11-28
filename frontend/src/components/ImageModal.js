@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiHeart, FiDownload, FiX, FiUser, FiCalendar, FiTrash2, FiMessageCircle, FiSend } from 'react-icons/fi';
 import axios from 'axios';
 import Tag from './Tag';
-
-const API_BASE = 'http://localhost:8080/api';
+import API_BASE from '../config';
 
 const ImageModal = ({ post, isOpen, onClose, onLike, onSave, onDelete, user }) => {
   const [isLiked, setIsLiked] = useState(post?.isLiked || false);

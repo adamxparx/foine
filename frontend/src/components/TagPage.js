@@ -4,8 +4,7 @@ import axios from 'axios';
 import Masonry from 'react-masonry-css';
 import { FiTag, FiArrowLeft } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-
-const API_BASE = 'http://localhost:8080/api';
+import API_BASE from '../config';
 
 const TagPage = () => {
   const { tagName } = useParams();

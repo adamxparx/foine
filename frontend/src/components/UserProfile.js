@@ -3,8 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Masonry from 'react-masonry-css';
 import { FiUser, FiCalendar, FiHeart, FiDownload, FiGrid } from 'react-icons/fi';
-
-const API_BASE = 'http://localhost:8080/api';
+import API_BASE from '../config';
 
 const UserProfile = ({ currentUser }) => {
   const { userId } = useParams();

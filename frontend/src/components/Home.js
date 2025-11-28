@@ -11,8 +11,7 @@ import MasonryGrid from './MasonryGrid';
 import Modals from './Modals';
 import UploadModal from './UploadModal';
 import ImageModal from './ImageModal';
-
-const API_BASE = 'http://localhost:8080/api';
+import API_BASE from '../config';
 
 function Home() {
   const [user, setUser] = useState(null);

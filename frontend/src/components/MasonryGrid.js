@@ -6,8 +6,7 @@ import { FiHeart, FiDownload, FiShare2, FiImage } from 'react-icons/fi';
 import PostSkeleton from './PostSkeleton';
 import Tag from './Tag';
 import axios from 'axios';
-
-const API_BASE = 'http://localhost:8080/api';
+import API_BASE from '../config';
 
 const Card = ({ post, index, onLike, onSave, onShare, onImageClick }) => {
   const [tags, setTags] = useState([]);
