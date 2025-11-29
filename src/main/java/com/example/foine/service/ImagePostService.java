@@ -18,7 +18,6 @@ import java.util.List;
 
 @Service
 @Slf4j
-@Transactional
 public class ImagePostService {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ImagePostService.class);
@@ -95,7 +94,7 @@ public class ImagePostService {
         Pageable pageable = org.springframework.data.domain.PageRequest.of(
             page, size, org.springframework.data.domain.Sort.by(
                 org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
-        return imagePostRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return imagePostRepository.findAll(pageable);
     }
 
     /**

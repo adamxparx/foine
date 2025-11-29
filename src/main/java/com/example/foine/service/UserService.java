@@ -1,61 +1,79 @@
 package com.example.foine.service;
 
-import java.util.Optional;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.example.foine.dto.LoginDTO;
-import com.example.foine.dto.UserDTO;
 import com.example.foine.entity.User;
 import com.example.foine.repository.UserRepository;
+import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
 
-    // Simple password hashing for demo (NOT secure for production)
-    private String hashPassword(String password) {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public User register(String email, String password) throws Exception {
+        // Validation
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be empty");
+        }
+        if (password == null || password.length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters");
+        }
+
+        // Check if already registered
+        User existingUser = userRepository.findByEmail(email).orElse(null);
+        if (existingUser != null) {
+            throw new IllegalArgumentException("Email already registered");
+        }
+
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(password.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hash) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            User newUser = new User();
+            newUser.setEmail(email);
+            
+            // Handle username: generate unique one from email + UUID suffix
+            String username = email.split("@")[0] + "_" + UUID.randomUUID().toString().substring(0, 8);
+            newUser.setUsername(username);
+            
+            newUser.setPassword(passwordEncoder.encode(password));
+
+            User savedUser = userRepository.save(newUser);
+            return savedUser;
+        } catch (Exception e) {
+            throw new RuntimeException("Registration failed: " + e.getMessage(), e);
         }
     }
 
-    public boolean register(UserDTO userDTO) {
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            return false;
+    public User login(String email, String password) throws Exception {
+        if (email == null || password == null) {
+            throw new IllegalArgumentException("Email and password required");
         }
 
-        String hashedPassword = hashPassword(userDTO.getPassword());
-        User user = new User(userDTO.getEmail(), hashedPassword, userDTO.getUsername());
-        userRepository.save(user);
-        return true;
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+
+        return user;
     }
 
-    public boolean login(LoginDTO loginDTO) {
-        return userRepository.findByEmail(loginDTO.getEmail())
-            .map(user -> hashPassword(loginDTO.getPassword()).equals(user.getPassword()))
-            .orElse(false);
-    }
-
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
+    public User getUserById(Long id) {
+        if (id == null) {
+            return null;
+        }
+        return userRepository.findById(id).orElse(null);
     }
 
     public User getUserByEmail(String email) {
+        if (email == null) {
+            return null;
+        }
         return userRepository.findByEmail(email).orElse(null);
     }
-
 }

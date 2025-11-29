@@ -26,7 +26,7 @@ public class ImagePostDTO {
         this.description = post.getDescription();
         this.imageUrl = post.getImageUrl();
         this.userId = post.getUserId();
-        this.username = post.getUser() != null ? post.getUser().getUsername() : "Unknown";
+        this.username = "Unknown"; // Temporarily set to Unknown to avoid lazy loading issues
         this.likes = post.getLikes();
         this.saves = post.getSaves();
         this.createdAt = post.getCreatedAt();

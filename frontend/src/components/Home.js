@@ -272,7 +272,7 @@ function Home() {
 
   const handleUpload = async (formData) => {
     try {
-      await axios.post(`${API_BASE}/posts/upload`, formData, {
+      const response = await axios.post(`${API_BASE}/posts/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -281,8 +281,28 @@ function Home() {
 
       alert('Post uploaded successfully!');
       setShowUpload(false);
-      // Refresh posts
-      fetchPosts();
+
+      // Prepend the new post to the current posts
+      const newPost = response.data;
+      if (user) {
+        // Add like/save status
+        try {
+          const [likedRes, savedRes, countRes] = await Promise.all([
+            axios.get(`${API_BASE}/posts/${newPost.id}/liked`, { params: { userId: user.id } }),
+            axios.get(`${API_BASE}/posts/${newPost.id}/saved`, { params: { userId: user.id } }),
+            axios.get(`${API_BASE}/posts/${newPost.id}/likes/count`)
+          ]);
+          newPost.isLiked = likedRes.data;
+          newPost.isSaved = savedRes.data;
+          newPost.likeCount = countRes.data;
+        } catch (err) {
+          console.error('Error fetching status for new post:', err);
+          newPost.isLiked = false;
+          newPost.isSaved = false;
+          newPost.likeCount = 0;
+        }
+      }
+      setPosts(prevPosts => [newPost, ...prevPosts]);
     } catch (err) {
       let errorMsg = 'Upload failed';
       if (err.response?.data) {

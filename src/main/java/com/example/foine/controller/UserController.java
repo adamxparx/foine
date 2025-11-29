@@ -1,24 +1,22 @@
 package com.example.foine.controller;
 
-import java.util.Map;
-import java.util.HashMap;
-
+import com.example.foine.dto.LoginDTO;
+import com.example.foine.dto.UserDTO;
 import com.example.foine.entity.User;
-
+import com.example.foine.service.UserService;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.foine.dto.LoginDTO;
-import com.example.foine.dto.UserDTO;
-import com.example.foine.service.UserService;
-
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
 public class UserController {
 
     @Autowired
@@ -26,35 +24,58 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
-        boolean success = userService.register(userDTO);
-        if (!success) {
-            return ResponseEntity.status(400).body("Email already exists.");
+        try {
+            User newUser = userService.register(userDTO.getEmail(), userDTO.getPassword());
+            return ResponseEntity.status(201).body(Map.of(
+                "success", true,
+                "message", "Registration successful",
+                "userId", newUser.getId(),
+                "email", newUser.getEmail()
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Server error: " + e.getMessage()));
         }
-
-        User savedUser = userService.getUserByEmail(userDTO.getEmail());
-        Map<String, Object> response = new HashMap<>();
-        response.put("userId", savedUser.getId());
-        response.put("email", savedUser.getEmail());
-        response.put("username", savedUser.getUsername());
-        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
-        boolean success = userService.login(loginDTO);
-        if (!success) {
-            return ResponseEntity.status(401).body("Invalid credentials.");
+        try {
+            User user = userService.login(loginDTO.getEmail(), loginDTO.getPassword());
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Login successful",
+                "userId", user.getId(),
+                "email", user.getEmail()
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Server error: " + e.getMessage()));
         }
-
-        User user = userService.getUserByEmail(loginDTO.getEmail());
-        return ResponseEntity.ok(
-            Map.of("userId", user.getId(), "email", user.getEmail(), "username", user.getUsername())
-        );
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
-        return ResponseEntity.ok("Successfully logged out.");
+        // Sessions are stateless (no session store), so logout is just client-side
+        // (Clear localStorage on frontend)
+        return ResponseEntity.ok(Map.of("message", "Logged out"));
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getUser(@PathVariable Long userId) {
+        try {
+            User user = userService.getUserById(userId);
+            if (user == null) {
+                return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+            }
+            return ResponseEntity.ok(Map.of(
+                "userId", user.getId(),
+                "email", user.getEmail()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
 }

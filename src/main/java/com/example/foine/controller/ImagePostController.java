@@ -31,6 +31,7 @@ import com.example.foine.entity.Tag;
 import com.example.foine.entity.User;
 import com.example.foine.exception.ImagePostException;
 import com.example.foine.repository.CommentsRepository;
+import com.example.foine.repository.ImagePostRepository;
 import com.example.foine.repository.LikesRepository;
 import com.example.foine.repository.SavesRepository;
 import com.example.foine.repository.UserRepository;
@@ -43,13 +44,15 @@ import jakarta.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping("/api/posts")
-@CrossOrigin(origins = "#{'${cors.allowed-origins:http://localhost:4029}'.split(',')}")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:4029", "https://foine-frontend.onrender.com"}, allowCredentials = "true")
 public class ImagePostController {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ImagePostController.class);
 
     @Value("${cors.allowed-origins:http://localhost:4029}")
     private String allowedOrigins;
+
+    @Autowired
     private ImagePostService imagePostService;
 
     @Autowired
@@ -66,6 +69,9 @@ public class ImagePostController {
 
     @Autowired
     private TagService tagService;
+
+    @Autowired
+    private ImagePostRepository imagePostRepository;
 
     /**
      * Get all posts (global feed) with pagination
@@ -188,26 +194,19 @@ public class ImagePostController {
 
     /**
      * Get posts by user ID
-     * GET /api/posts/user/{userId}?page=0&size=10
+     * GET /api/posts/user/{userId}
      */
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Page<ImagePostDTO>> getUserPosts(
-            @PathVariable Long userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size) {
-
-        log.debug("GET /api/posts/user/{} - page: {}, size: {}", userId, page, size);
-
+    public ResponseEntity<?> getUserPosts(@PathVariable Long userId) {
         try {
-            Page<ImagePost> posts = imagePostService.getUserPosts(userId, page, size);
-            Page<ImagePostDTO> dtoPage = posts.map(ImagePostDTO::new);
-            return ResponseEntity.ok(dtoPage);
-        } catch (ImagePostException e) {
-            log.warn("Error fetching user posts: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+            List<ImagePost> posts = imagePostRepository.findByUserIdOrderByCreatedAtDesc(userId);
+            return ResponseEntity.ok(Map.of(
+                "userId", userId,
+                "posts", posts,
+                "total", posts.size()
+            ));
         } catch (Exception e) {
-            log.error("Error fetching user posts: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }
 
