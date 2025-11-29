@@ -1,16 +1,23 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './components/Home';
-import UserProfile from './components/UserProfile';
-import TagPage from './components/TagPage';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Auth from './pages/Auth';
+import Home from './pages/Home';
+import Profile from './pages/Profile';
+import './App.css';
+
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  return token ? children : <Navigate to="/auth" />;
+};
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/user/:userId" element={<UserProfile />} />
-        <Route path="/tag/:tagName" element={<TagPage />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );
