@@ -9,10 +9,6 @@ const Profile = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchUserProfile();
-  }, [fetchUserProfile]);
-
   const fetchUserProfile = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
@@ -41,6 +37,10 @@ const Profile = () => {
       setLoading(false);
     }
   }, [navigate]);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
